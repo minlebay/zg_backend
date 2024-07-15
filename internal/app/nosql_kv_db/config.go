@@ -1,4 +1,4 @@
-package keyvalue_db
+package nosql_kv_db
 
 import cfg "go.uber.org/config"
 
