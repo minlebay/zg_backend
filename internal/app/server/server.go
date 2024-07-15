@@ -6,21 +6,18 @@ import (
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 	"sync"
+	"zg_backend/internal/app/router_v1"
 )
-
-type Router interface {
-	RegisterRoutes(e *echo.Echo)
-}
 
 type Server struct {
 	Config *Config
 	Logger *zap.Logger
 	wg     sync.WaitGroup
 	Echo   *echo.Echo
-	Router Router
+	Router *router_v1.Router
 }
 
-func NewServer(logger *zap.Logger, config *Config, router Router) *Server {
+func NewServer(logger *zap.Logger, config *Config, router *router_v1.Router) *Server {
 	return &Server{
 		Logger: logger,
 		Config: config,

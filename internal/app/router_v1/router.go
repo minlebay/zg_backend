@@ -1,23 +1,23 @@
 package router_v1
 
 import (
-	"context"
 	"github.com/labstack/echo/v4"
+	"zg_backend/internal/app/handlers"
 )
 
-type RouterV1 struct{}
-
-func NewRouter() *RouterV1 {
-	return &RouterV1{}
+type Router struct {
+	sqlHandler   *handlers.SqlHandler
+	noSqlHandler *handlers.NoSqlHandler
 }
 
-func (r *RouterV1) Start(ctx context.Context) {
+func NewRouter(sqlHandler *handlers.SqlHandler, noSqlHandler *handlers.NoSqlHandler) *Router {
+	return &Router{
+		sqlHandler:   sqlHandler,
+		noSqlHandler: noSqlHandler,
+	}
 }
 
-func (r *RouterV1) Stop(ctx context.Context) {
-}
-
-func (r *RouterV1) RegisterRoutes(e *echo.Echo) {
+func (r *Router) RegisterRoutes(e *echo.Echo) {
 	r.registerSqlRoutes(e)
 	r.registerNoSqlRoutes(e)
 }
