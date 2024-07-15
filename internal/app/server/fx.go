@@ -3,6 +3,7 @@ package server
 import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"zg_backend/internal/app/router_v1"
 )
 
 func NewModule() fx.Option {
@@ -12,6 +13,7 @@ func NewModule() fx.Option {
 		fx.Provide(
 			NewServerConfig,
 			NewServer,
+			router_v1.NewRouter,
 		),
 		fx.Invoke(
 			func(lc fx.Lifecycle, s *Server) {

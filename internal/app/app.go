@@ -6,6 +6,7 @@ import (
 	"zg_backend/internal/app/cache"
 	"zg_backend/internal/app/nosql_kv_db"
 	"zg_backend/internal/app/nosql_repository"
+	"zg_backend/internal/app/router_v1"
 	"zg_backend/internal/app/server"
 	"zg_backend/internal/app/sql_kv_db"
 	"zg_backend/internal/app/sql_repository"
@@ -20,6 +21,7 @@ func NewApp() *fx.App {
 			sql_repository.NewModule(),
 			nosql_repository.NewModule(),
 			server.NewModule(),
+			router_v1.NewModule(),
 		),
 		fx.Provide(
 			zap.NewProduction,
