@@ -1,4 +1,4 @@
-package repository
+package sql_repository
 
 import (
 	"context"
@@ -40,12 +40,6 @@ func (r *MySQLRepository) Start(ctx context.Context) {
 				return
 			}
 			r.dbs = append(r.dbs, gdb)
-
-			err = r.DoMigrations(db.MigrationsPath, gdb)
-			if err != nil {
-				r.Logger.Error("Failed to migrate db", zap.Error(err))
-				return
-			}
 		}
 	}()
 }

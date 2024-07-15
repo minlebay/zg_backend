@@ -1,17 +1,16 @@
-package cache
+package keyvalue_db
 
 import cfg "go.uber.org/config"
 
 type Config struct {
 	Address string `yaml:"address"`
 	DB      string `yaml:"db"`
-	ExpTime string `yaml:"exp_time"`
 }
 
-func NewCacheConfig(provider cfg.Provider) (*Config, error) {
+func NewKeyValueDbConfig(provider cfg.Provider) (*Config, error) {
 	config := Config{}
 
-	if err := provider.Get("sql_cache").Populate(&config); err != nil {
+	if err := provider.Get("nosql_kv_db").Populate(&config); err != nil {
 		return nil, err
 	}
 

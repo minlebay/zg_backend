@@ -1,4 +1,4 @@
-package repository
+package sql_repository
 
 import (
 	cfg "go.uber.org/config"
@@ -14,14 +14,14 @@ type Db struct {
 }
 
 type Config struct {
-	Dbs []Db `yaml:"dbs"`
+	Dbs []Db `yaml:"sql_dbs"`
 }
 
 func NewRepositoryConfig(provider cfg.Provider) (*Config, error) {
 	config := Config{}
 	dbs := []Db{}
 
-	err := provider.Get("dbs").Populate(&dbs)
+	err := provider.Get("sql_dbs").Populate(&dbs)
 	if err != nil {
 		return nil, err
 	}

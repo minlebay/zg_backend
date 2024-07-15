@@ -3,7 +3,7 @@ telemetry:
   interval: 10
   address: localhost:8888
 
-dbs:
+sql_dbs:
   - host: ${MYSQL_DB_1_HOST}
     port: ${MYSQL_DB_1_PORT}
     database: ${MYSQL_DATABASE}
@@ -18,11 +18,24 @@ dbs:
     password: ${MYSQL_PASSWORD}
     migrations_path: ./db/migrations
 
-cache:
-  address: ${ZG_REDIS_ADDRESS}
+nosql_dbs:
+  mongodb:
+    - ${ZG_MONGODB_URL_1}
+    - ${ZG_MONGODB_URL_2}
+
+sql_cache:
+  address: ${ZG_SQL_REDIS_URL}
   db: ${ZG_REDIS_CACHE_DB}
   exp_time: ${ZG_REDIS_EXP_TIME}
 
-kvdb:
-  address: ${ZG_REDIS_ADDRESS}
+sql_kv_db:
+  address: ${ZG_SQL_REDIS_URL}
   db: ${ZG_REDIS_DB}
+
+nosql_kv_db:
+  address: ${ZG_NOSQL_REDIS_URL}
+  db: ${ZG_REDIS_DB}
+
+
+server:
+  port: ${ZG_BACKEND_PORT}

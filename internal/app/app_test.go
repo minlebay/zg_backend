@@ -6,14 +6,20 @@ import (
 	"go.uber.org/zap"
 	"testing"
 	"zg_backend/internal/app/cache"
-	"zg_backend/internal/app/repository"
+	"zg_backend/internal/app/nosql_repository"
+	"zg_backend/internal/app/server"
+	"zg_backend/internal/app/sql_kv_db"
+	"zg_backend/internal/app/sql_repository"
 )
 
 func TestValidateApp(t *testing.T) {
 	err := fx.ValidateApp(
 		fx.Options(
 			cache.NewModule(),
-			repository.NewModule(),
+			sql_kv_db.NewModule(),
+			sql_repository.NewModule(),
+			nosql_repository.NewModule(),
+			server.NewModule(),
 		),
 		fx.Provide(
 			zap.NewProduction,

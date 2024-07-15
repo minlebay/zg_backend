@@ -1,4 +1,4 @@
-package repository
+package sql_repository
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"zg_backend/internal/model"
 )
 
-type Repository interface {
+type SqlRepository interface {
 	Start(ctx context.Context)
 	Stop(ctx context.Context)
 	GetAll(ctx context.Context) ([]*model.Message, error)
@@ -28,11 +28,11 @@ func NewModule() fx.Option {
 			NewRepositoryConfig,
 			fx.Annotate(
 				NewMySQLRepository,
-				fx.As(new(Repository)),
+				fx.As(new(SqlRepository)),
 			),
 		),
 		fx.Invoke(
-			func(lc fx.Lifecycle, r Repository) {
+			func(lc fx.Lifecycle, r SqlRepository) {
 				lc.Append(fx.StartStopHook(r.Start, r.Start))
 			},
 		),

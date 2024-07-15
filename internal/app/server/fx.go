@@ -1,26 +1,25 @@
 package server
 
 import (
-	"context"
 	"go.uber.org/fx"
-	"log"
-	"time"
+	"go.uber.org/zap"
 )
 
-func NewServer(lc fx.Lifecycle, c *config.Config) *echo.Echo {
-	e := echo.New()
+func NewModule() fx.Option {
 
-	lc.Append(fx.Hook{
-		OnStart: func(context.Context) error {
-			h.SetOnlineSince(time.Now())
-			go e.Start(":8080")
-			return nil
-		},
-		OnStop: func(c context.Context) error {
-			log.Println("Stopping server")
-			return e.Shutdown(c)
-		},
-	})
-
-	return e
+	return fx.Module(
+		"repo",
+		fx.Provide(
+			NewServerConfig,
+			NewServer,
+		),
+		fx.Invoke(
+			func(lc fx.Lifecycle, s *Server) {
+				lc.Append(fx.StartStopHook(s.StartServer, s.StopServer))
+			},
+		),
+		fx.Decorate(func(log *zap.Logger) *zap.Logger {
+			return log.Named("repo")
+		}),
+	)
 }
