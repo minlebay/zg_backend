@@ -44,7 +44,7 @@ func (s *noSqlService) GetMessageByID(id string) (*model.Message, error) {
 
 	dbs := s.repo.GetDbs()
 	dbsCount := len(dbs)
-	shardIndex, err := s.getShardIndex(id, dbsCount)
+	shardIndex, err := s.getShardIndex(id, dbsCount) // TODO use redis instead of crc32
 	if err != nil {
 		s.logger.Error("Failed to get shard index", zap.Error(err))
 	}

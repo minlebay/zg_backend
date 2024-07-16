@@ -11,13 +11,9 @@ import (
 type SqlRepository interface {
 	Start(ctx context.Context)
 	Stop(ctx context.Context)
-	GetAll(ctx context.Context) ([]*model.Message, error)
-	Create(ctx context.Context, shard int, entity *model.Message) error
-	GetById(ctx context.Context, id string) (*model.Message, error)
-	Update(ctx context.Context, id string, entity *model.Message) (*model.Message, error)
-	Delete(ctx context.Context, id string) error
+	GetAll(ctx context.Context, db *gorm.DB) ([]*model.Message, error)
+	GetById(ctx context.Context, uuid string, db *gorm.DB) (*model.Message, error)
 	GetDbs() []*gorm.DB
-	DoMigrations(pathToMigrations string, db *gorm.DB) error
 }
 
 func NewModule() fx.Option {

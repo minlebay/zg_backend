@@ -2,11 +2,9 @@ package sql_repository
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/pressly/goose"
 	"go.uber.org/zap"
 	"sync"
 	"zg_backend/internal/model"
@@ -55,45 +53,21 @@ func (r *MySQLRepository) Stop(ctx context.Context) {
 	r.Logger.Info("Repo started")
 }
 
-func (r *MySQLRepository) GetAll(ctx context.Context) ([]*model.Message, error) {
-
-	return nil, nil
+func (r *MySQLRepository) GetAll(ctx context.Context, db *gorm.DB) ([]*model.Message, error) {
+	var messages []*model.Message
+	err := db.Find(&messages)
+	if err.Error != nil {
+		return nil, err.Error
+	}
+	return messages, nil
 }
 
-func (r *MySQLRepository) Create(ctx context.Context, shard int, entity *model.Message) error {
-	db := r.dbs[shard]
-	return db.Create(entity).Error
-}
-
-func (r *MySQLRepository) GetById(ctx context.Context, id string) (*model.Message, error) {
-
-	return nil, nil
-}
-
-func (r *MySQLRepository) Update(ctx context.Context, id string, entity *model.Message) (*model.Message, error) {
-
-	return nil, nil
-}
-
-func (r *MySQLRepository) Delete(ctx context.Context, id string) error {
-
-	return nil
+func (r *MySQLRepository) GetById(ctx context.Context, id string, db *gorm.DB) (*model.Message, error) {
+	m := &model.Message{}
+	err := db.Where("uuid=?", id).First(&m).Error
+	return m, err
 }
 
 func (r *MySQLRepository) GetDbs() []*gorm.DB {
 	return r.dbs
-}
-
-func (r *MySQLRepository) DoMigrations(pathToMigrations string, db *gorm.DB) error {
-
-	err := goose.Up(db.DB(), pathToMigrations)
-	if err != nil {
-		if errors.As(err, &goose.ErrNoNextVersion) {
-			r.Logger.Info("No migrations to run")
-			return nil
-		}
-		return err
-	}
-
-	return nil
 }
