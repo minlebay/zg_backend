@@ -16,6 +16,7 @@ type NoSqlRepository interface {
 	GetById(ctx context.Context, db mongo.Database, id string) (*model.Message, error)
 	Update(ctx context.Context, db mongo.Database, id string, entity *model.Message) (*model.Message, error)
 	Delete(ctx context.Context, db mongo.Database, id string) error
+	GetDbs() []*mongo.Database
 }
 
 func NewModule() fx.Option {

@@ -3,7 +3,6 @@ package nosql_repository
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
@@ -90,51 +89,38 @@ func (r *MongoRepository) Create(ctx context.Context, db mongo.Database, entity 
 	return entity, nil
 }
 
-func (r *MongoRepository) GetById(ctx context.Context, db mongo.Database, id string) (*model.Message, error) {
+func (r *MongoRepository) GetById(ctx context.Context, db mongo.Database, uuid string) (*model.Message, error) {
 	r.Collection = db.Collection("messages")
 
-	objId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
 	var entity model.Message
-	err = r.Collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&entity)
+	err := r.Collection.FindOne(ctx, bson.M{"uuid": uuid}).Decode(&entity)
 	if err != nil {
 		return nil, err
 	}
 	return &entity, nil
 }
 
-func (r *MongoRepository) Update(ctx context.Context, db mongo.Database, id string, entity *model.Message) (*model.Message, error) {
+func (r *MongoRepository) Update(ctx context.Context, db mongo.Database, uuid string, entity *model.Message) (*model.Message, error) {
 	r.Collection = db.Collection("messages")
-
-	objId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
 
 	update := bson.M{"$set": entity}
 	opts := options.FindOneAndUpdate().SetReturnDocument(options.After)
-	result := r.Collection.FindOneAndUpdate(ctx, bson.M{"_id": objId}, update, opts)
-	if err = result.Err(); err != nil {
+	result := r.Collection.FindOneAndUpdate(ctx, bson.M{"uuid": uuid}, update, opts)
+	if err := result.Err(); err != nil {
 		return nil, err
 	}
 
-	err = result.Decode(&entity)
+	err := result.Decode(&entity)
 	if err != nil {
 		return nil, err
 	}
 	return entity, nil
 }
 
-func (r *MongoRepository) Delete(ctx context.Context, db mongo.Database, id string) error {
+func (r *MongoRepository) Delete(ctx context.Context, db mongo.Database, uuid string) error {
 	r.Collection = db.Collection("messages")
 
-	objId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
-	res, err := r.Collection.DeleteOne(ctx, bson.M{"_id": objId})
+	res, err := r.Collection.DeleteOne(ctx, bson.M{"uuid": uuid})
 	if err != nil {
 		return err
 	}
@@ -142,4 +128,8 @@ func (r *MongoRepository) Delete(ctx context.Context, db mongo.Database, id stri
 		return err
 	}
 	return nil
+}
+
+func (r *MongoRepository) GetDbs() []*mongo.Database {
+	return r.DBs
 }
