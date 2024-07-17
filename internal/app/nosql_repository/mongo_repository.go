@@ -6,10 +6,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
+	"hash/crc32"
 	url2 "net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"zg_backend/internal/app/nosql_kv_db"
 	"zg_backend/internal/model"
 )
 
@@ -21,12 +24,14 @@ type MongoRepository struct {
 	Collection       *mongo.Collection
 	CancelFunc       context.CancelFunc
 	ClientDisconnect func()
+	kvDb             nosql_kv_db.NosqlKvDb
 }
 
-func NewMongoRepository(logger *zap.Logger, config *Config) *MongoRepository {
+func NewMongoRepository(logger *zap.Logger, config *Config, kv nosql_kv_db.NosqlKvDb) *MongoRepository {
 	return &MongoRepository{
 		Config: config,
 		Logger: logger,
+		kvDb:   kv,
 	}
 }
 
@@ -65,39 +70,63 @@ func (r *MongoRepository) Stop() {
 	r.Logger.Info("Repo stopped")
 }
 
-func (r *MongoRepository) GetMessages(filter interface{}, db mongo.Database) ([]*model.Message, error) {
+func (r *MongoRepository) GetMessages(filter interface{}) ([]*model.Message, error) {
 	if filter == nil {
 		filter = bson.D{}
 	}
 
+	dbs := r.DBs
+	var allMessages []*model.Message
+
+	for _, db := range dbs {
+
+		r.Collection = db.Collection("messages")
+		ctx := context.Background()
+		cursor, err := r.Collection.Find(ctx, filter)
+		if err != nil {
+			return nil, err
+		}
+		var messages []*model.Message
+
+		if err := cursor.All(ctx, &messages); err != nil {
+			return nil, err
+		}
+
+		allMessages = append(allMessages, messages...)
+	}
+
+	return allMessages, nil
+}
+
+func (r *MongoRepository) GetById(uuid string) (*model.Message, error) {
+
+	var dbNumber int
+	dbBytes, err := r.kvDb.Get(uuid)
+	if err != nil {
+		dbNumber, _ = r.getShardIndex(uuid, len(r.DBs)) // default shard index
+	} else {
+		var dbNumber64 int64
+		if dbNumber64, err = strconv.ParseInt(string(dbBytes), 10, 0); err != nil {
+			return nil, err
+		}
+		dbNumber = int(dbNumber64)
+	}
+
+	db := r.DBs[dbNumber]
 	r.Collection = db.Collection("messages")
 	ctx := context.Background()
-	var entities []*model.Message
 
-	cursor, err := r.Collection.Find(ctx, filter)
+	var message model.Message
+	err = r.Collection.FindOne(ctx, bson.M{"uuid": uuid}).Decode(&message)
 	if err != nil {
 		return nil, err
 	}
-
-	if err := cursor.All(ctx, &entities); err != nil {
-		return nil, err
-	}
-
-	return entities, nil
+	return &message, nil
 }
 
-func (r *MongoRepository) GetById(db mongo.Database, uuid string) (*model.Message, error) {
-	r.Collection = db.Collection("messages")
-	ctx := context.Background()
-
-	var entity model.Message
-	err := r.Collection.FindOne(ctx, bson.M{"uuid": uuid}).Decode(&entity)
-	if err != nil {
-		return nil, err
-	}
-	return &entity, nil
-}
-
-func (r *MongoRepository) GetDbs() []*mongo.Database {
-	return r.DBs
+func (r *MongoRepository) getShardIndex(uuid string, dbsCount int) (int, error) {
+	uuidBytes := []byte(uuid)
+	hash := crc32.ChecksumIEEE(uuidBytes)
+	shardNumber := int(hash) % dbsCount
+	return shardNumber, nil
 }

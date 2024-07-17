@@ -2,7 +2,6 @@ package services
 
 import (
 	"go.uber.org/zap"
-	"hash/crc32"
 	"sort"
 	"zg_backend/internal/app/nosql_repository"
 	"zg_backend/internal/model"
@@ -27,14 +26,9 @@ func NewNoSqlService(l *zap.Logger, r nosql_repository.NoSqlRepository) NoSqlSer
 
 func (s *noSqlService) GetAll(page int, size int) ([]*model.Message, error) {
 
-	var messages []*model.Message
-	dbs := s.repo.GetDbs()
-	for _, db := range dbs {
-		msgs, err := s.repo.GetMessages(nil, *db)
-		if err != nil {
-			return nil, err
-		}
-		messages = append(messages, msgs...)
+	messages, err := s.repo.GetMessages(nil)
+	if err != nil {
+		return nil, err
 	}
 
 	sort.Slice(messages, func(i, j int) bool {
@@ -57,20 +51,5 @@ func (s *noSqlService) GetAll(page int, size int) ([]*model.Message, error) {
 }
 
 func (s *noSqlService) GetMessageByID(id string) (*model.Message, error) {
-
-	dbs := s.repo.GetDbs()
-	dbsCount := len(dbs)
-	shardIndex, err := s.getShardIndex(id, dbsCount) // TODO use redis instead of crc32
-	if err != nil {
-		s.logger.Error("Failed to get shard index", zap.Error(err))
-	}
-
-	return s.repo.GetById(*dbs[shardIndex], id)
-}
-
-func (s *noSqlService) getShardIndex(uuid string, dbsCount int) (int, error) {
-	uuidBytes := []byte(uuid)
-	hash := crc32.ChecksumIEEE(uuidBytes)
-	shardNumber := int(hash) % dbsCount
-	return shardNumber, nil
+	return s.repo.GetById(id)
 }

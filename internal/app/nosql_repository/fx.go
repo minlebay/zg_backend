@@ -1,7 +1,6 @@
 package nosql_repository
 
 import (
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"zg_backend/internal/model"
@@ -10,9 +9,8 @@ import (
 type NoSqlRepository interface {
 	Start()
 	Stop()
-	GetMessages(filter interface{}, db mongo.Database) ([]*model.Message, error)
-	GetById(db mongo.Database, id string) (*model.Message, error)
-	GetDbs() []*mongo.Database
+	GetMessages(filter interface{}) ([]*model.Message, error)
+	GetById(id string) (*model.Message, error)
 }
 
 func NewModule() fx.Option {

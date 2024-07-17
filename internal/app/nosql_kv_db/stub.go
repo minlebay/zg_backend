@@ -1,7 +1,6 @@
 package nosql_kv_db
 
 import (
-	"context"
 	"go.uber.org/zap"
 )
 
@@ -17,11 +16,11 @@ func NewCacheStub(config *Config, logger *zap.Logger) *Stub {
 	}
 }
 
-func (c *Stub) Start(ctx context.Context) {
+func (c *Stub) Start() {
 
 }
 
-func (c *Stub) Stop(ctx context.Context) {
+func (c *Stub) Stop() {
 
 }
 

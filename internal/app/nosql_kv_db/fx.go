@@ -1,7 +1,6 @@
 package nosql_kv_db
 
 import (
-	"context"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
@@ -9,8 +8,8 @@ import (
 var _ NosqlKvDb = (*Redis)(nil)
 
 type NosqlKvDb interface {
-	Start(ctx context.Context)
-	Stop(ctx context.Context)
+	Start()
+	Stop()
 	Get(key string) (out []byte, err error)
 	Put(key string, value []byte) (err error)
 	Delete(key string) (err error)

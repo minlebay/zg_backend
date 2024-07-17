@@ -25,7 +25,7 @@ func NewServer(logger *zap.Logger, config *Config, router *router_v1.Router) *Se
 	}
 }
 
-func (s *Server) StartServer(ctx context.Context) {
+func (s *Server) StartServer() {
 	go func() {
 		s.Echo = echo.New()
 		s.Router.RegisterRoutes(s.Echo)
@@ -33,7 +33,7 @@ func (s *Server) StartServer(ctx context.Context) {
 	}()
 }
 
-func (s *Server) StopServer(ctx context.Context) {
+func (s *Server) StopServer() {
 	s.wg.Wait()
 	s.Echo.Shutdown(context.Background())
 	s.Logger.Info("Server stopped")
