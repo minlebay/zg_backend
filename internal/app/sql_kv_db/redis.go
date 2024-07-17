@@ -1,7 +1,6 @@
 package sql_kv_db
 
 import (
-	"context"
 	"github.com/go-redis/redis"
 	"go.uber.org/zap"
 	"sort"
@@ -23,7 +22,7 @@ func NewRedis(logger *zap.Logger, config *Config) *Redis {
 	}
 }
 
-func (r *Redis) Start(ctx context.Context) {
+func (r *Redis) Start() {
 	go func() {
 		numdb, err := strconv.ParseInt(r.Config.DB, 10, 64)
 		if err != nil {
@@ -41,7 +40,7 @@ func (r *Redis) Start(ctx context.Context) {
 	}()
 }
 
-func (r *Redis) Stop(ctx context.Context) {
+func (r *Redis) Stop() {
 	r.wg.Wait()
 	err := r.db.Close()
 	if err != nil {

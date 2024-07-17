@@ -1,7 +1,6 @@
 package sql_repository
 
 import (
-	"github.com/jinzhu/gorm"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"zg_backend/internal/model"
@@ -10,9 +9,8 @@ import (
 type SqlRepository interface {
 	Start()
 	Stop()
-	GetAll(db *gorm.DB) ([]*model.Message, error)
-	GetById(db *gorm.DB, uuid string) (*model.Message, error)
-	GetDbs() []*gorm.DB
+	GetAll() ([]*model.Message, error)
+	GetById(uuid string) (*model.Message, error)
 }
 
 func NewModule() fx.Option {

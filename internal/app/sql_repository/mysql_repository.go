@@ -5,7 +5,11 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"go.uber.org/zap"
+	"hash/crc32"
+	"strconv"
 	"sync"
+	"zg_backend/internal/app/cache"
+	"zg_backend/internal/app/sql_kv_db"
 	"zg_backend/internal/model"
 )
 
@@ -14,12 +18,21 @@ type MySQLRepository struct {
 	Logger *zap.Logger
 	wg     sync.WaitGroup
 	dbs    []*gorm.DB
+	kvDb   sql_kv_db.SqlKvDb
+	cache  cache.Cache
 }
 
-func NewMySQLRepository(logger *zap.Logger, config *Config) *MySQLRepository {
+func NewMySQLRepository(
+	logger *zap.Logger,
+	config *Config,
+	kvDb sql_kv_db.SqlKvDb,
+	cache cache.Cache,
+) *MySQLRepository {
 	return &MySQLRepository{
 		Config: config,
 		Logger: logger,
+		kvDb:   kvDb,
+		cache:  cache,
 	}
 }
 
@@ -52,21 +65,47 @@ func (r *MySQLRepository) Stop() {
 	r.Logger.Info("Repo started")
 }
 
-func (r *MySQLRepository) GetAll(db *gorm.DB) ([]*model.Message, error) {
-	var messages []*model.Message
-	err := db.Find(&messages)
-	if err.Error != nil {
-		return nil, err.Error
+func (r *MySQLRepository) GetAll() ([]*model.Message, error) {
+
+	dbs := r.dbs
+	var allMessages []*model.Message
+
+	for _, db := range dbs {
+		var messages []*model.Message
+		err := db.Find(&messages)
+		if err.Error != nil {
+			return nil, err.Error
+		}
+		allMessages = append(allMessages, messages...)
 	}
-	return messages, nil
+
+	return allMessages, nil
+
 }
 
-func (r *MySQLRepository) GetById(db *gorm.DB, id string) (*model.Message, error) {
-	m := &model.Message{}
-	err := db.Where("uuid=?", id).First(&m).Error
-	return m, err
+func (r *MySQLRepository) GetById(uuid string) (*model.Message, error) {
+	var dbNumber int
+	dbBytes, err := r.kvDb.Get(uuid)
+	if err != nil {
+		dbNumber, _ = r.getShardIndex(uuid, len(r.dbs)) // default shard index
+	} else {
+		var dbNumber64 int64
+		if dbNumber64, err = strconv.ParseInt(string(dbBytes), 10, 0); err != nil {
+			return nil, err
+		}
+		dbNumber = int(dbNumber64)
+	}
+
+	var message model.Message
+	db := r.dbs[dbNumber]
+	err = db.Where("uuid=?", uuid).First(&message).Error
+
+	return &message, err
 }
 
-func (r *MySQLRepository) GetDbs() []*gorm.DB {
-	return r.dbs
+func (r *MySQLRepository) getShardIndex(uuid string, dbsCount int) (int, error) {
+	uuidBytes := []byte(uuid)
+	hash := crc32.ChecksumIEEE(uuidBytes)
+	shardNumber := int(hash) % dbsCount
+	return shardNumber, nil
 }

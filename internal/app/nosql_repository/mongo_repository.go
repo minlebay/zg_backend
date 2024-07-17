@@ -20,18 +20,18 @@ type MongoRepository struct {
 	Config           *Config
 	Logger           *zap.Logger
 	wg               sync.WaitGroup
-	DBs              []*mongo.Database
-	Collection       *mongo.Collection
-	CancelFunc       context.CancelFunc
-	ClientDisconnect func()
+	dbs              []*mongo.Database
+	collection       *mongo.Collection
+	cancelFunc       context.CancelFunc
+	clientDisconnect func()
 	kvDb             nosql_kv_db.NosqlKvDb
 }
 
-func NewMongoRepository(logger *zap.Logger, config *Config, kv nosql_kv_db.NosqlKvDb) *MongoRepository {
+func NewMongoRepository(logger *zap.Logger, config *Config, kvDb nosql_kv_db.NosqlKvDb) *MongoRepository {
 	return &MongoRepository{
 		Config: config,
 		Logger: logger,
-		kvDb:   kv,
+		kvDb:   kvDb,
 	}
 }
 
@@ -45,27 +45,27 @@ func (r *MongoRepository) Start() {
 			databaseName := strings.TrimPrefix(url.Path, "/")
 
 			dbctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			r.CancelFunc = cancel
+			r.cancelFunc = cancel
 
 			clientOptions := options.Client().ApplyURI(db)
 			client, err := mongo.Connect(dbctx, clientOptions)
 			if err != nil {
 				r.Logger.Fatal("Failed to connect to MongoDB: %v", zap.Error(err))
 			}
-			r.ClientDisconnect = func() {
+			r.clientDisconnect = func() {
 				if err = client.Disconnect(dbctx); err != nil {
 					r.Logger.Fatal("Failed to disconnect from MongoDB: %v", zap.Error(err))
 				}
 			}
-			r.DBs = append(r.DBs, client.Database(databaseName))
+			r.dbs = append(r.dbs, client.Database(databaseName))
 		}
 	}()
 }
 
 func (r *MongoRepository) Stop() {
 	r.wg.Wait()
-	r.ClientDisconnect()
-	r.CancelFunc()
+	r.clientDisconnect()
+	r.cancelFunc()
 
 	r.Logger.Info("Repo stopped")
 }
@@ -75,14 +75,13 @@ func (r *MongoRepository) GetMessages(filter interface{}) ([]*model.Message, err
 		filter = bson.D{}
 	}
 
-	dbs := r.DBs
+	dbs := r.dbs
 	var allMessages []*model.Message
 
 	for _, db := range dbs {
-
-		r.Collection = db.Collection("messages")
+		r.collection = db.Collection("messages")
 		ctx := context.Background()
-		cursor, err := r.Collection.Find(ctx, filter)
+		cursor, err := r.collection.Find(ctx, filter)
 		if err != nil {
 			return nil, err
 		}
@@ -103,7 +102,7 @@ func (r *MongoRepository) GetById(uuid string) (*model.Message, error) {
 	var dbNumber int
 	dbBytes, err := r.kvDb.Get(uuid)
 	if err != nil {
-		dbNumber, _ = r.getShardIndex(uuid, len(r.DBs)) // default shard index
+		dbNumber, _ = r.getShardIndex(uuid, len(r.dbs)) // default shard index
 	} else {
 		var dbNumber64 int64
 		if dbNumber64, err = strconv.ParseInt(string(dbBytes), 10, 0); err != nil {
@@ -112,12 +111,12 @@ func (r *MongoRepository) GetById(uuid string) (*model.Message, error) {
 		dbNumber = int(dbNumber64)
 	}
 
-	db := r.DBs[dbNumber]
-	r.Collection = db.Collection("messages")
+	db := r.dbs[dbNumber]
+	r.collection = db.Collection("messages")
 	ctx := context.Background()
 
 	var message model.Message
-	err = r.Collection.FindOne(ctx, bson.M{"uuid": uuid}).Decode(&message)
+	err = r.collection.FindOne(ctx, bson.M{"uuid": uuid}).Decode(&message)
 	if err != nil {
 		return nil, err
 	}
