@@ -1,7 +1,6 @@
 package sql_repository
 
 import (
-	"context"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -24,7 +23,7 @@ func NewMySQLRepository(logger *zap.Logger, config *Config) *MySQLRepository {
 	}
 }
 
-func (r *MySQLRepository) Start(ctx context.Context) {
+func (r *MySQLRepository) Start() {
 	go func() {
 		for _, db := range r.Config.Dbs {
 			args := fmt.Sprintf(
@@ -42,7 +41,7 @@ func (r *MySQLRepository) Start(ctx context.Context) {
 	}()
 }
 
-func (r *MySQLRepository) Stop(ctx context.Context) {
+func (r *MySQLRepository) Stop() {
 	r.wg.Wait()
 	for _, db := range r.dbs {
 		err := db.Close()
@@ -53,7 +52,7 @@ func (r *MySQLRepository) Stop(ctx context.Context) {
 	r.Logger.Info("Repo started")
 }
 
-func (r *MySQLRepository) GetAll(ctx context.Context, db *gorm.DB) ([]*model.Message, error) {
+func (r *MySQLRepository) GetAll(db *gorm.DB) ([]*model.Message, error) {
 	var messages []*model.Message
 	err := db.Find(&messages)
 	if err.Error != nil {
@@ -62,7 +61,7 @@ func (r *MySQLRepository) GetAll(ctx context.Context, db *gorm.DB) ([]*model.Mes
 	return messages, nil
 }
 
-func (r *MySQLRepository) GetById(ctx context.Context, id string, db *gorm.DB) (*model.Message, error) {
+func (r *MySQLRepository) GetById(db *gorm.DB, id string) (*model.Message, error) {
 	m := &model.Message{}
 	err := db.Where("uuid=?", id).First(&m).Error
 	return m, err

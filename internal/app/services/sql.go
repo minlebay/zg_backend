@@ -2,12 +2,13 @@ package services
 
 import (
 	"hash/crc32"
+	"sort"
 	"zg_backend/internal/app/sql_repository"
 	"zg_backend/internal/model"
 )
 
 type SqlService interface {
-	GetAll(filter interface{}, page int, size int) ([]*model.Message, error)
+	GetAll(page int, size int) ([]*model.Message, error)
 	GetMessageByID(string) (*model.Message, error)
 }
 
@@ -19,25 +20,38 @@ func NewSqlService(r sql_repository.SqlRepository) SqlService {
 	return &sqlService{r}
 }
 
-func (s sqlService) GetAll(filter interface{}, page int, size int) ([]*model.Message, error) {
+func (s *sqlService) GetAll(page int, size int) ([]*model.Message, error) {
 
-	// TODO implement pagination
-
-	dbs := s.repo.GetDbs()
 	var messages []*model.Message
-
+	dbs := s.repo.GetDbs()
 	for _, db := range dbs {
-		msgs, err := s.repo.GetAll(nil, db)
+		msgs, err := s.repo.GetAll(db)
 		if err != nil {
 			return nil, err
 		}
 		messages = append(messages, msgs...)
 	}
 
-	return messages, nil
+	sort.Slice(messages, func(i, j int) bool {
+		return messages[i].Uuid < messages[j].Uuid
+	})
+
+	totalMessages := len(messages)
+	start := page * size
+	end := start + size
+
+	if start >= totalMessages {
+		return []*model.Message{}, nil
+	}
+
+	if end > totalMessages {
+		end = totalMessages
+	}
+
+	return messages[start:end], nil
 }
 
-func (s sqlService) GetMessageByID(uuid string) (*model.Message, error) {
+func (s *sqlService) GetMessageByID(uuid string) (*model.Message, error) {
 
 	dbs := s.repo.GetDbs()
 	shardIndex, err := s.getShardIndex(uuid, len(dbs)) // TODO use redis instead of crc32
@@ -47,7 +61,7 @@ func (s sqlService) GetMessageByID(uuid string) (*model.Message, error) {
 
 	// TODO implement work with cache
 
-	return s.repo.GetById(nil, uuid, dbs[shardIndex])
+	return s.repo.GetById(dbs[shardIndex], uuid)
 
 }
 

@@ -16,7 +16,7 @@ func NewSqlHandler(sqlService services.SqlService) *SqlHandler {
 
 func (h *SqlHandler) GetAll(c echo.Context) error {
 	page, size := getPagination(c)
-	messages, err := h.sqlService.GetAll(nil, page, size)
+	messages, err := h.sqlService.GetAll(page, size)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, errorResponse(err))
 	}

@@ -1,7 +1,6 @@
 package sql_repository
 
 import (
-	"context"
 	"github.com/jinzhu/gorm"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -9,10 +8,10 @@ import (
 )
 
 type SqlRepository interface {
-	Start(ctx context.Context)
-	Stop(ctx context.Context)
-	GetAll(ctx context.Context, db *gorm.DB) ([]*model.Message, error)
-	GetById(ctx context.Context, uuid string, db *gorm.DB) (*model.Message, error)
+	Start()
+	Stop()
+	GetAll(db *gorm.DB) ([]*model.Message, error)
+	GetById(db *gorm.DB, uuid string) (*model.Message, error)
 	GetDbs() []*gorm.DB
 }
 

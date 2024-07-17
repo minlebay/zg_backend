@@ -30,7 +30,7 @@ func NewMongoRepository(logger *zap.Logger, config *Config) *MongoRepository {
 	}
 }
 
-func (r *MongoRepository) Start(ctx context.Context) {
+func (r *MongoRepository) Start() {
 	go func() {
 		for _, db := range r.Config.Dbs {
 			url, err := url2.Parse(db)
@@ -57,7 +57,7 @@ func (r *MongoRepository) Start(ctx context.Context) {
 	}()
 }
 
-func (r *MongoRepository) Stop(ctx context.Context) {
+func (r *MongoRepository) Stop() {
 	r.wg.Wait()
 	r.ClientDisconnect()
 	r.CancelFunc()
@@ -65,32 +65,30 @@ func (r *MongoRepository) Stop(ctx context.Context) {
 	r.Logger.Info("Repo stopped")
 }
 
-func (r *MongoRepository) GetAll(ctx context.Context, db mongo.Database) ([]*model.Message, error) {
-	r.Collection = db.Collection("messages")
+func (r *MongoRepository) GetMessages(filter interface{}, db mongo.Database) ([]*model.Message, error) {
+	if filter == nil {
+		filter = bson.D{}
+	}
 
+	r.Collection = db.Collection("messages")
+	ctx := context.Background()
 	var entities []*model.Message
-	cursor, err := r.Collection.Find(ctx, bson.M{})
+
+	cursor, err := r.Collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
+
 	if err := cursor.All(ctx, &entities); err != nil {
 		return nil, err
 	}
+
 	return entities, nil
 }
 
-func (r *MongoRepository) Create(ctx context.Context, db mongo.Database, entity *model.Message) (*model.Message, error) {
+func (r *MongoRepository) GetById(db mongo.Database, uuid string) (*model.Message, error) {
 	r.Collection = db.Collection("messages")
-
-	_, err := r.Collection.InsertOne(ctx, entity)
-	if err != nil {
-		return nil, err
-	}
-	return entity, nil
-}
-
-func (r *MongoRepository) GetById(ctx context.Context, db mongo.Database, uuid string) (*model.Message, error) {
-	r.Collection = db.Collection("messages")
+	ctx := context.Background()
 
 	var entity model.Message
 	err := r.Collection.FindOne(ctx, bson.M{"uuid": uuid}).Decode(&entity)
@@ -98,36 +96,6 @@ func (r *MongoRepository) GetById(ctx context.Context, db mongo.Database, uuid s
 		return nil, err
 	}
 	return &entity, nil
-}
-
-func (r *MongoRepository) Update(ctx context.Context, db mongo.Database, uuid string, entity *model.Message) (*model.Message, error) {
-	r.Collection = db.Collection("messages")
-
-	update := bson.M{"$set": entity}
-	opts := options.FindOneAndUpdate().SetReturnDocument(options.After)
-	result := r.Collection.FindOneAndUpdate(ctx, bson.M{"uuid": uuid}, update, opts)
-	if err := result.Err(); err != nil {
-		return nil, err
-	}
-
-	err := result.Decode(&entity)
-	if err != nil {
-		return nil, err
-	}
-	return entity, nil
-}
-
-func (r *MongoRepository) Delete(ctx context.Context, db mongo.Database, uuid string) error {
-	r.Collection = db.Collection("messages")
-
-	res, err := r.Collection.DeleteOne(ctx, bson.M{"uuid": uuid})
-	if err != nil {
-		return err
-	}
-	if res.DeletedCount == 0 {
-		return err
-	}
-	return nil
 }
 
 func (r *MongoRepository) GetDbs() []*mongo.Database {

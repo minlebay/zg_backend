@@ -1,7 +1,6 @@
 package nosql_repository
 
 import (
-	"context"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -9,13 +8,10 @@ import (
 )
 
 type NoSqlRepository interface {
-	Start(ctx context.Context)
-	Stop(ctx context.Context)
-	GetAll(ctx context.Context, db mongo.Database) ([]*model.Message, error)
-	Create(ctx context.Context, db mongo.Database, entity *model.Message) (*model.Message, error)
-	GetById(ctx context.Context, db mongo.Database, id string) (*model.Message, error)
-	Update(ctx context.Context, db mongo.Database, id string, entity *model.Message) (*model.Message, error)
-	Delete(ctx context.Context, db mongo.Database, id string) error
+	Start()
+	Stop()
+	GetMessages(filter interface{}, db mongo.Database) ([]*model.Message, error)
+	GetById(db mongo.Database, id string) (*model.Message, error)
 	GetDbs() []*mongo.Database
 }
 

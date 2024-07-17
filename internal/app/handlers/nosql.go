@@ -16,7 +16,7 @@ func NewNoSqlHandler(noSqlService services.NoSqlService) *NoSqlHandler {
 
 func (h *NoSqlHandler) GetAll(c echo.Context) error {
 	page, size := getPagination(c)
-	messages, err := h.noSqlService.GetAll(nil, page, size)
+	messages, err := h.noSqlService.GetAll(page, size)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
