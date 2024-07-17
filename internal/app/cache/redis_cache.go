@@ -1,4 +1,4 @@
-package sql_kv_db
+package cache
 
 import (
 	"github.com/go-redis/redis"
@@ -6,29 +6,32 @@ import (
 	"sort"
 	"strconv"
 	"sync"
+	"time"
 )
 
-type Redis struct {
-	Config *Config
-	Logger *zap.Logger
-	db     *redis.Client
-	wg     sync.WaitGroup
+type RedisCache struct {
+	Config  *Config
+	Logger  *zap.Logger
+	db      *redis.Client
+	wg      sync.WaitGroup
+	expires time.Duration
 }
 
-func NewRedis(logger *zap.Logger, config *Config) *Redis {
-	return &Redis{
+func NewRedisCache(logger *zap.Logger, config *Config) *RedisCache {
+	return &RedisCache{
 		Config: config,
 		Logger: logger,
 	}
 }
 
-func (r *Redis) Start() {
+func (r *RedisCache) Start() {
 	go func() {
 		numdb, err := strconv.ParseInt(r.Config.DB, 10, 64)
 		if err != nil {
 			r.Logger.Error("Failed to parse DB", zap.Error(err))
 		}
 
+		r.expires, err = time.ParseDuration(r.Config.ExpTime)
 		if err != nil {
 			r.Logger.Error("Failed to parse expiration time", zap.Error(err))
 		}
@@ -40,30 +43,30 @@ func (r *Redis) Start() {
 	}()
 }
 
-func (r *Redis) Stop() {
+func (r *RedisCache) Stop() {
 	r.wg.Wait()
 	err := r.db.Close()
 	if err != nil {
-		r.Logger.Error("Failed to disconnect from Redis", zap.Error(err))
+		r.Logger.Error("Failed to disconnect from RedisCache", zap.Error(err))
 	}
 }
 
-func (r *Redis) Get(key string) (out []byte, err error) {
+func (r *RedisCache) Get(key string) (out []byte, err error) {
 	out, err = r.db.Get(key).Bytes()
 	return
 }
 
-func (r *Redis) Put(key string, value []byte) (err error) {
-	err = r.db.Set(key, string(value), 0).Err()
+func (r *RedisCache) Put(key string, value []byte) (err error) {
+	err = r.db.Set(key, string(value), r.expires).Err()
 	return
 }
 
-func (r *Redis) Delete(key string) (err error) {
+func (r *RedisCache) Delete(key string) (err error) {
 	err = r.db.Del(key).Err()
 	return
 }
 
-func (r *Redis) Iterate(filter string) (out []string, err error) {
+func (r *RedisCache) Iterate(filter string) (out []string, err error) {
 	if filter != "" {
 		filter += "*"
 	}

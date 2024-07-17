@@ -9,14 +9,12 @@ sql_dbs:
     database: ${MYSQL_DATABASE}
     user: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
-    migrations_path: ./db/migrations
 
   - host: ${MYSQL_DB_2_HOST}
     port: ${MYSQL_DB_2_PORT}
     database: ${MYSQL_DATABASE}
     user: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
-    migrations_path: ./db/migrations
 
 nosql_dbs:
   mongodb:
@@ -35,7 +33,6 @@ sql_kv_db:
 nosql_kv_db:
   address: ${ZG_NOSQL_REDIS_URL}
   db: ${ZG_REDIS_DB}
-
 
 server:
   port: ${ZG_BACKEND_PORT}

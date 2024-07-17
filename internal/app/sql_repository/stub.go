@@ -40,23 +40,23 @@ func NewRepositoryStub(config *Config, logger *zap.Logger) *Stub {
 	}
 }
 
-func (r *Stub) Start(ctx context.Context) {
+func (r *Stub) Start() {
 
 }
 
-func (r *Stub) Stop(ctx context.Context) {
+func (r *Stub) Stop() {
 
 }
 
-func (r *Stub) GetAll(ctx context.Context) ([]*model.Message, error) {
+func (r *Stub) GetAll() ([]*model.Message, error) {
 	return []*model.Message{stubMessage}, nil
 }
 
-func (r *Stub) Create(ctx context.Context, shard int, entity *model.Message) error {
+func (r *Stub) Create(shard int, entity *model.Message) error {
 	return nil
 }
 
-func (r *Stub) GetById(ctx context.Context, id string) (*model.Message, error) {
+func (r *Stub) GetById(id string) (*model.Message, error) {
 	return stubMessage, nil
 }
 

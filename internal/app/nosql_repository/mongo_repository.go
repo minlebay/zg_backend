@@ -102,6 +102,7 @@ func (r *MongoRepository) GetById(uuid string) (*model.Message, error) {
 	var dbNumber int
 	dbBytes, err := r.kvDb.Get(uuid)
 	if err != nil {
+		r.Logger.Error("Failed to get shard index, use crc32 to target shard number", zap.Error(err))
 		dbNumber, _ = r.getShardIndex(uuid, len(r.dbs)) // default shard index
 	} else {
 		var dbNumber64 int64

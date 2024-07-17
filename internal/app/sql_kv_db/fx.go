@@ -5,7 +5,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var _ SqlKvDb = (*Redis)(nil)
+var _ SqlKvDb = (*RedisSqlKvDb)(nil)
 
 type SqlKvDb interface {
 	Start()
@@ -19,11 +19,11 @@ type SqlKvDb interface {
 func NewModule() fx.Option {
 
 	return fx.Module(
-		"redis",
+		"sqlKvDb",
 		fx.Provide(
 			NewKeyValueDbConfig,
 			fx.Annotate(
-				NewRedis,
+				NewRedisSqlKvDb,
 				fx.As(new(SqlKvDb)),
 			),
 		),
@@ -33,7 +33,7 @@ func NewModule() fx.Option {
 			},
 		),
 		fx.Decorate(func(log *zap.Logger) *zap.Logger {
-			return log.Named("redis")
+			return log.Named("sqlKvDb")
 		}),
 	)
 }

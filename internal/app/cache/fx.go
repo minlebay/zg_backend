@@ -1,16 +1,15 @@
 package cache
 
 import (
-	"context"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
 
-var _ Cache = (*Redis)(nil)
+var _ Cache = (*RedisCache)(nil)
 
 type Cache interface {
-	Start(ctx context.Context)
-	Stop(ctx context.Context)
+	Start()
+	Stop()
 	Get(key string) (out []byte, err error)
 	Put(key string, value []byte) (err error)
 	Delete(key string) (err error)
@@ -24,7 +23,7 @@ func NewModule() fx.Option {
 		fx.Provide(
 			NewCacheConfig,
 			fx.Annotate(
-				NewRedis,
+				NewRedisCache,
 				fx.As(new(Cache)),
 			),
 		),

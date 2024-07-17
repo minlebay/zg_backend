@@ -13,11 +13,11 @@ func NewNoSqlStub() *NoSqlStub {
 	return &NoSqlStub{}
 }
 
-func (s *NoSqlStub) Start(ctx context.Context) {}
+func (s *NoSqlStub) Start() {}
 
-func (s *NoSqlStub) Stop(ctx context.Context) {}
+func (s *NoSqlStub) Stop() {}
 
-func (s *NoSqlStub) GetAll(ctx context.Context, db mongo.Database) ([]*model.Message, error) {
+func (s *NoSqlStub) GetAll() ([]*model.Message, error) {
 	return nil, nil
 }
 

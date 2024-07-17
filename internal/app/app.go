@@ -16,26 +16,33 @@ import (
 
 func NewApp() *fx.App {
 	return fx.New(
+
+		// web
+		fx.Options(
+			server.NewModule(),
+			fx.Provide(
+				router_v1.NewRouter,
+				handlers.NewSqlHandler,
+				handlers.NewNoSqlHandler,
+			),
+		),
+
+		// services
+		fx.Provide(
+			services.NewSqlService,
+			services.NewNoSqlService,
+		),
+
+		// database
 		fx.Options(
 			cache.NewModule(),
 			sql_kv_db.NewModule(),
 			nosql_kv_db.NewModule(),
 			sql_repository.NewModule(),
 			nosql_repository.NewModule(),
-			server.NewModule(),
 		),
 
-		fx.Provide(
-			router_v1.NewRouter,
-			handlers.NewSqlHandler,
-			handlers.NewNoSqlHandler,
-		),
-
-		fx.Provide(
-			services.NewSqlService,
-			services.NewNoSqlService,
-		),
-
+		// utility
 		fx.Provide(
 			zap.NewProduction,
 			NewConfig,
