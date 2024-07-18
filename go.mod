@@ -5,7 +5,6 @@ go 1.22
 require (
 	github.com/golang/protobuf v1.5.4
 	github.com/jinzhu/gorm v1.9.16
-	github.com/pressly/goose v2.7.0+incompatible
 	github.com/stretchr/testify v1.8.4
 	go.mongodb.org/mongo-driver v1.16.0
 	go.uber.org/config v1.4.0
@@ -39,7 +38,6 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/labstack/echo/v4 v4.12.0
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.uber.org/dig v1.17.1 // indirect
 	go.uber.org/multierr v1.10.0 // indirect

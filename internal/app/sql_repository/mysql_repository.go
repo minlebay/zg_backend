@@ -120,26 +120,29 @@ func (r *MySQLRepository) getFromCacheOrWarmUp(uuid string, dbNumber int) (*mode
 	if err == nil {
 		err = message.Unmarshal(bytes)
 		if err != nil {
-			return nil, err
+			r.Logger.Error("Failed to unmarshal cached message", zap.Error(err))
 		}
-		if message.Uuid == "" { // empty message, cache miss
-
-			db := r.dbs[dbNumber]
-			err = db.Where("uuid=?", uuid).First(&message).Error
-			if err != nil {
-				return nil, err
-			}
-
-			// warm up cache
-			bytes, err = message.Marshal()
-			if err != nil {
-				r.Logger.Error("Failed to marshal message", zap.Error(err))
-			}
-			err = r.cache.Put(uuid, bytes)
-			if err != nil {
-				r.Logger.Error("Failed to put message to cache", zap.Error(err))
-			}
+		if message.Uuid != "" { // empty message, cache miss
+			return &message, nil
 		}
+	}
+
+	r.Logger.Info("Cache miss, try to get message from db", zap.String("uuid", uuid))
+
+	db := r.dbs[dbNumber]
+	err = db.Where("uuid=?", uuid).First(&message).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// warm up cache
+	bytes, err = message.Marshal()
+	if err != nil {
+		r.Logger.Error("Failed to marshal message", zap.Error(err))
+	}
+	err = r.cache.Put(uuid, bytes)
+	if err != nil {
+		r.Logger.Error("Failed to put message to cache", zap.Error(err))
 	}
 
 	return &message, err
