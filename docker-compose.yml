@@ -1,0 +1,19 @@
+version: '3'
+
+networks:
+  local-net:
+    external: true
+
+services:
+
+  zg_backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: zg_backend
+    env_file:
+      - .env-docker
+    networks:
+      - local-net
+    volumes:
+      - .:/app
