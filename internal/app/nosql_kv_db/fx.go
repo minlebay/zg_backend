@@ -21,7 +21,7 @@ func NewModule() fx.Option {
 	return fx.Module(
 		"nosqlKvDb",
 		fx.Provide(
-			NewKeyValueDbConfig,
+			NewNosqlKeyValueDbConfig,
 			fx.Annotate(
 				NewRedisNosqlKvDb,
 				fx.As(new(NosqlKvDb)),

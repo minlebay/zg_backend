@@ -7,7 +7,7 @@ type Config struct {
 	DB      string `yaml:"db"`
 }
 
-func NewKeyValueDbConfig(provider cfg.Provider) (*Config, error) {
+func NewNosqlKeyValueDbConfig(provider cfg.Provider) (*Config, error) {
 	config := Config{}
 
 	if err := provider.Get("nosql_kv_db").Populate(&config); err != nil {
