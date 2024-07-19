@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (r *Router) registerNoSqlRoutes(e *echo.Echo) {
-	e.GET("/nosql", r.noSqlHandler.GetAll)
-	e.GET("/nosql/:id", r.noSqlHandler.GetById)
+func (r *Router) registerNoSqlRoutes(g *echo.Group) {
+	g.GET("/nosql", r.noSqlHandler.GetAll)
+	g.GET("/nosql/:id", r.noSqlHandler.GetById)
 }

@@ -1,0 +1,98 @@
+basePath: /api/v1
+definitions:
+  handlers.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Backend app for ZmeyGorynych project. Written for fun :)
+  title: ZG Backend API
+  version: "1"
+paths:
+  /nosql:
+    get:
+      consumes:
+      - application/json
+      description: Get all messages from mongodb
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: Get all messages from mongodb
+  /nosql/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a message by ID from mongodb
+      parameters:
+      - description: Message ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: Get a message by ID from mongodb
+  /sql:
+    get:
+      consumes:
+      - application/json
+      description: Get all messages from mysql
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: Get all messages from mysql
+  /sql/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a message by ID from mysql
+      parameters:
+      - description: Message ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: Get a message by ID from mysql
+swagger: "2.0"

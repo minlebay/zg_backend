@@ -2,6 +2,8 @@ package router_v1
 
 import (
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
+	_ "zg_backend/docs"
 	"zg_backend/internal/app/handlers"
 )
 
@@ -18,6 +20,11 @@ func NewRouter(sqlHandler *handlers.SqlHandler, noSqlHandler *handlers.NoSqlHand
 }
 
 func (r *Router) RegisterRoutes(e *echo.Echo) {
-	r.registerSqlRoutes(e)
-	r.registerNoSqlRoutes(e)
+	g := e.Group("api/v1")
+
+	r.registerSqlRoutes(g)
+	r.registerNoSqlRoutes(g)
+
+	e.GET("/swagger/*any", echoSwagger.WrapHandler)
+
 }
