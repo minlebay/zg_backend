@@ -20,6 +20,15 @@ paths:
       consumes:
       - application/json
       description: Get all messages from mongodb
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
       produces:
       - application/json
       responses:
@@ -60,6 +69,15 @@ paths:
       consumes:
       - application/json
       description: Get all messages from mysql
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
       produces:
       - application/json
       responses:

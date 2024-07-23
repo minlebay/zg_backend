@@ -23,6 +23,8 @@ func NewSqlHandler(sqlService services.SqlService) *SqlHandler {
 // @Success 200 {object} Response
 // @Failure 500 {object} Response
 // @Router /sql [get]
+// @Param page query int false "Page number"
+// @Param size query int false "Page size"
 func (h *SqlHandler) GetAll(c echo.Context) error {
 	page, size := getPagination(c)
 	var messages []*model.Message

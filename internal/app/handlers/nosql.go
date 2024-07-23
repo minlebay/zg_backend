@@ -23,6 +23,8 @@ func NewNoSqlHandler(noSqlService services.NoSqlService) *NoSqlHandler {
 // @Success 200 {object} Response
 // @Failure 500 {object} Response
 // @Router /nosql [get]
+// @Param page query int false "Page number"
+// @Param size query int false "Page size"
 func (h *NoSqlHandler) GetAll(c echo.Context) error {
 	page, size := getPagination(c)
 	var messages []*model.Message
