@@ -2,7 +2,7 @@
 
 # Backend Application
 
-The Backend Application is a part of the Message Generator and Router Project. It integrates with both SQL and NoSQL databases and uses Redis for caching and key-value storage.
+The Backend Application is a part of the ZmeyGorynych Project. It integrates with both SQL and NoSQL databases and uses Redis for caching and key-value storage.
 
 ## Components
 
