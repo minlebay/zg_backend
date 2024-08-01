@@ -105,8 +105,8 @@ server:
 ### Running the Backend Application
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/message-generator.git
-   cd message-generator/backend
+   git clone https://github.com/minlebay/zg_backend.git
+   cd zg_backend
    ```
 2. Build and run the Docker containers:
    ```bash
