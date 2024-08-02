@@ -56,10 +56,6 @@ ZG_MONGODB_URL_2=mongodb://zg_mongodb_2:27017/zg_mongodb_2
 
 #### Configuration File (`config.yaml`)
 ```yaml
-telemetry:
-  enabled: true
-  interval: 10
-  address: localhost:8888
 
 sql_dbs:
   - host: ${MYSQL_DB_1_HOST}
