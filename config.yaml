@@ -1,33 +1,33 @@
 sql_dbs:
-  - host: ${MYSQL_DB_1_HOST}
-    port: ${MYSQL_DB_1_PORT}
-    database: ${MYSQL_DATABASE}
-    user: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
+  - host: ${MYSQL_DB_1_HOST:localhost}
+    port: ${MYSQL_DB_1_PORT:3306}
+    database: ${MYSQL_DATABASE:db}
+    user: ${MYSQL_USER:user}
+    password: ${MYSQL_PASSWORD:password}
 
-  - host: ${MYSQL_DB_2_HOST}
-    port: ${MYSQL_DB_2_PORT}
-    database: ${MYSQL_DATABASE}
-    user: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
+  - host: ${MYSQL_DB_2_HOST:localhost}
+    port: ${MYSQL_DB_2_PORT:3307}
+    database: ${MYSQL_DATABASE:db}
+    user: ${MYSQL_USER:user}
+    password: ${MYSQL_PASSWORD:password}
 
 nosql_dbs:
   mongodb:
-    - ${ZG_MONGODB_URL_1}
-    - ${ZG_MONGODB_URL_2}
+    - ${ZG_MONGODB_URL_1:mongodb://localhost:27017/zg_mongodb}
+    - ${ZG_MONGODB_URL_2:mongodb://localhost:27017/zg_mongodb_2}
 
 sql_cache:
-  address: ${ZG_SQL_REDIS_URL}
-  db: ${ZG_REDIS_CACHE_DB}
-  exp_time: ${ZG_REDIS_EXP_TIME}
+  address: ${ZG_SQL_REDIS_URL:localhost:6379}
+  db: ${ZG_REDIS_CACHE_DB:1}
+  exp_time: ${ZG_REDIS_EXP_TIME:3600s}
 
 sql_kv_db:
-  address: ${ZG_SQL_REDIS_URL}
-  db: ${ZG_REDIS_DB}
+  address: ${ZG_SQL_REDIS_URL:localhost:16379}
+  db: ${ZG_REDIS_DB:0}
 
 nosql_kv_db:
-  address: ${ZG_NOSQL_REDIS_URL}
-  db: ${ZG_REDIS_DB}
+  address: ${ZG_NOSQL_REDIS_URL:localhost:6379}
+  db: ${ZG_REDIS_DB:0}
 
 server:
-  port: ${ZG_BACKEND_PORT}
+  port: ${ZG_BACKEND_PORT:8080}
