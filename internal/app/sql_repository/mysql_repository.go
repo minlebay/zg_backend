@@ -106,6 +106,9 @@ func (r *MySQLRepository) GetById(uuid string) (*model.Message, error) {
 }
 
 func (r *MySQLRepository) getShardIndex(uuid string, dbsCount int) (int, error) {
+	if dbsCount == 0 {
+		return 0, fmt.Errorf("no dbs available")
+	}
 	uuidBytes := []byte(uuid)
 	hash := crc32.ChecksumIEEE(uuidBytes)
 	shardNumber := int(hash) % dbsCount
